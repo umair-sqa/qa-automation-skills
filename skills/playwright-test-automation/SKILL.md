@@ -180,7 +180,7 @@ test('admin can delete a product they created', async ({ request, authedPage }) 
 });
 ```
 
-Combining `request` (setup and verification) with the page (the one interaction being tested) is faster than driving every precondition through the UI and asserts on the same ground truth the API layer uses.
+Combining `request` (setup and verification) with the page (the one interaction being tested) is faster than driving every precondition through the UI and asserts on the same ground truth the API layer uses. This is `request` as a UI-test helper, scoped to one test's setup/teardown — for a dedicated API test suite where the API itself is the subject under test (auth fixtures, environment config, request chaining, Postman/Newman), see `api-test-automation-implementation`.
 
 ## Data-Driven Tests and Reporting
 

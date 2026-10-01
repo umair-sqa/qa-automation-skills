@@ -70,7 +70,7 @@ For the handful of skills you reach for across every repo, not just this one: VS
 
 ## If skills don't appear
 
-1. **Check the symlink resolved.** `ls .github/skills` should list every directory under `skills/`. A repo copy method that doesn't preserve symlinks will leave this empty — recreate with `ln -s ../skills .github/skills` from the repo root.
+1. **Check the symlink resolved.** `ls .github/skills` should list every directory under `skills/`. A repo copy method that doesn't preserve symlinks will leave this empty — recreate with `ln -s ../skills .github/skills` from the repo root. On Windows, a plain `git clone` checks a symlink out as a text file containing the target path unless `git config core.symlinks true` is set (and Developer Mode or an elevated prompt is available) — if `.github/skills` is a file instead of a directory, that's why.
 2. **Check the frontmatter.** `name` must be present and match the directory — `scripts/validate-skills.js` is the CI gate for this.
 3. **Check the Configure Skills menu.** Run `/skills` and confirm the skill is enabled.
 4. **Start a fresh session.** Newly added skills aren't always picked up mid-conversation.

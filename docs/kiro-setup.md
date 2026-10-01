@@ -55,7 +55,7 @@ Kiro doesn't have a direct equivalent of Copilot's `*.agent.md` custom agents as
 
 ## If skills don't appear
 
-1. Confirm the symlink resolved: `ls .kiro/skills` should list every directory under `skills/`. If it's broken (e.g. the repo was copied in a way that doesn't preserve symlinks), recreate it: `ln -s ../skills .kiro/skills` from the repo root.
+1. Confirm the symlink resolved: `ls .kiro/skills` should list every directory under `skills/`. If it's broken (e.g. the repo was copied in a way that doesn't preserve symlinks), recreate it: `ln -s ../skills .kiro/skills` from the repo root. On Windows, a plain `git clone` checks a symlink out as a text file containing the target path unless `git config core.symlinks true` is set (and Developer Mode or an elevated prompt is available) — if `.kiro/skills` is a file instead of a directory, that's why.
 2. Confirm `name` in a skill's frontmatter matches its directory name — `scripts/validate-skills.js` enforces this and will catch drift.
 3. Restart the Kiro session — newly added skills aren't always picked up mid-conversation.
 

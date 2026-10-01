@@ -85,7 +85,7 @@ Native — `skills/` and `agents/` are discovered directly, `.claude/commands/` 
 
 ## Validation & Evals
 
-- `node scripts/validate-skills.js` — structural CI gate: frontmatter contract, heading order, and command-to-skill references. Currently 26/26 skills, 4/4 agents, 14/14 commands passing.
+- `npm test` (or `node scripts/validate-skills.js` directly) — structural CI gate, run automatically on push/PR via `.github/workflows/validate.yml`: frontmatter contract, heading order, command-to-skill references, and that `.github/prompts/`/`.kiro/steering/` aliases haven't drifted from their `.claude/commands/` source. Currently 26/26 skills, 4/4 agents, 14/14 commands, 14/14 aliases passing.
 - `evals/cases.md` — representative prompts (positive, ambiguous, out-of-scope, and "should ask a clarifying question") for a human or agent reviewer to walk through after changing any skill description. Not a live-model grader — see `evals/README.md`.
 
 ## Status

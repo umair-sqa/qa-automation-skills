@@ -44,6 +44,8 @@ expect(res.body.status).toBe('confirmed');
 expect(res.body.total).toEqual(expect.any(Number));
 ```
 
+This example pairs a plain HTTP client with a separate schema-matcher library (e.g. `jest-json-schema`) — the two concerns (make the request, validate the shape) are decoupled. PactumJS instead bundles both into one chain (`spec().get(...).expectJsonSchema(schema)`); either is fine, the requirement here is the schema assertion itself, not which library produces it. See `api-test-automation-implementation` for the runner/library setup (Playwright, Postman/Newman, PactumJS, Jest/Mocha+Supertest) once the assertion rules here are decided.
+
 ### Negative-case coverage checklist per endpoint
 
 | Case | What to assert |

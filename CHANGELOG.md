@@ -16,6 +16,22 @@ All notable changes to this catalog are documented here. Format loosely follows 
 - `.github/prompts/*.prompt.md` and `.kiro/steering/*.md` — the existing 14 `.claude/commands/` short aliases (`/spec`, `/api-test`, `/flaky-triage`, etc.), regenerated in each tool's native alias format so the same short entry points work in Copilot and Kiro.
 - `docs/copilot-setup.md` and `docs/kiro-setup.md` — setup and troubleshooting guides for each tool, including how to regenerate an alias after editing its `.claude/commands/` source.
 
+### Added — CI gate and drift detection (review pass)
+
+- `.github/workflows/validate.yml` — runs `scripts/validate-skills.js` on every push/PR. The README and `evals/README.md` both described this script as "a CI gate" before this workflow existed; nothing was actually wired up to run it automatically.
+- `scripts/validate-skills.js` now also checks that every `.github/prompts/*.prompt.md` and `.kiro/steering/*.md` alias is byte-for-byte in sync with its `.claude/commands/*.md` source (summary line, body, and required frontmatter field), so a hand-edit to one of the three copies that isn't propagated to the other two fails CI instead of silently drifting.
+- `package.json`'s `test` script ran `echo "Error: no test specified" && exit 1` unconditionally — replaced with the actual validator; added a `validate` alias script.
+- `.gitignore` — didn't exist; a `.DS_Store` was already sitting untracked in the repo root.
+- `playwright-test-automation`'s "API Testing with the `request` Fixture" section now cross-references `api-test-automation-implementation` to make the boundary explicit: `request` as a UI-test setup/verification helper (that section) vs. a dedicated API test suite where the API is the subject under test (the new skill).
+- Noted the Windows symlink caveat (`core.symlinks`, Developer Mode) in both setup docs' troubleshooting sections, since `.github/skills`/`.kiro/skills` are real symlinks, not copies.
+
+### Extended — more API testing framework coverage (skills-only review pass)
+
+- `api-test-automation-implementation` — added PactumJS and Jest/Mocha+Supertest/Chai as a third implementation path alongside Playwright and Postman/Newman: frontmatter description, a `When to Use` bullet, framework-specific guidance folded into Core Process steps 1-5 (path selection, auth-per-state, environment config, secrets, request chaining), two new worked examples (PactumJS chaining/schema/mock, Jest and Mocha+Chai+Supertest), a rationalization and two checks about not silently splitting coverage across two runners for the same endpoints.
+- `api-contract-test-automation` — noted that PactumJS bundles the request + schema-assertion steps its first code example keeps decoupled, cross-referenced to `api-test-automation-implementation` for runner setup.
+- `test-automation-framework-selection` — API framework comparison line now includes PactumJS and the Jest/Mocha+Supertest pairing, not just REST Assured/Supertest/Postman.
+- `evals/cases.md` — added a routing case for the Pactum-vs-Jest+Supertest decision, disambiguating the implementation skill (how to build it) from the framework-selection skill (which tool and why).
+
 ## [2026-09-26]
 
 ### Added — initial catalog scaffold

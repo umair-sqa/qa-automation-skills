@@ -28,6 +28,8 @@ const ROOT = path.resolve(__dirname, '..');
 const SKILLS_DIR = path.join(ROOT, 'skills');
 const AGENTS_DIR = path.join(ROOT, 'agents');
 const COMMANDS_DIR = path.join(ROOT, '.claude', 'commands');
+const PROMPTS_DIR = path.join(ROOT, '.github', 'prompts');
+const STEERING_DIR = path.join(ROOT, '.kiro', 'steering');
 
 const REQUIRED_HEADINGS_IN_ORDER = [
   'Overview',
@@ -232,6 +234,63 @@ function validateCommand(fileName, skillNames) {
 }
 
 // ---------------------------------------------------------------------------
+// Validation: .github/prompts/*.prompt.md and .kiro/steering/*.md stay in
+// sync with their .claude/commands/*.md source (see docs/copilot-setup.md
+// for the regeneration command). Each command file is:
+//   line 1: "# /name", line 2: blank, line 3: one-line summary, line 4: blank,
+//   line 5+: body.
+// The generated Copilot prompt file is frontmatter(description=summary) +
+// blank + body. The generated Kiro steering file is
+// frontmatter(inclusion=manual) + the command file's full content unchanged.
+// ---------------------------------------------------------------------------
+
+function validateAliasSync(commandFileName) {
+  const base = path.basename(commandFileName, '.md');
+  const failures = [];
+
+  const claudeContent = fs.readFileSync(path.join(COMMANDS_DIR, commandFileName), 'utf8');
+  const claudeLines = claudeContent.split(/\r?\n/);
+  const summary = claudeLines[2];
+  const claudeBody = claudeLines.slice(4).join('\n').replace(/\s+$/, '');
+
+  const promptPath = path.join(PROMPTS_DIR, `${base}.prompt.md`);
+  if (!fs.existsSync(promptPath)) {
+    failures.push(`missing .github/prompts/${base}.prompt.md (regenerate from .claude/commands/${commandFileName} — see docs/copilot-setup.md)`);
+  } else {
+    const { frontmatter, body, error } = parseFrontmatter(fs.readFileSync(promptPath, 'utf8'));
+    if (error) {
+      failures.push(`.github/prompts/${base}.prompt.md: ${error}`);
+    } else {
+      if (frontmatter.description !== summary) {
+        failures.push(`.github/prompts/${base}.prompt.md \`description\` has drifted from the summary line in .claude/commands/${commandFileName}`);
+      }
+      if (body.replace(/^\s+/, '').replace(/\s+$/, '') !== claudeBody) {
+        failures.push(`.github/prompts/${base}.prompt.md body has drifted from .claude/commands/${commandFileName} — regenerate it`);
+      }
+    }
+  }
+
+  const steeringPath = path.join(STEERING_DIR, `${base}.md`);
+  if (!fs.existsSync(steeringPath)) {
+    failures.push(`missing .kiro/steering/${base}.md (regenerate from .claude/commands/${commandFileName} — see docs/kiro-setup.md)`);
+  } else {
+    const { frontmatter, body, error } = parseFrontmatter(fs.readFileSync(steeringPath, 'utf8'));
+    if (error) {
+      failures.push(`.kiro/steering/${base}.md: ${error}`);
+    } else {
+      if (frontmatter.inclusion !== 'manual') {
+        failures.push(`.kiro/steering/${base}.md frontmatter \`inclusion\` must be \`manual\``);
+      }
+      if (body.replace(/\s+$/, '') !== claudeContent.replace(/\s+$/, '')) {
+        failures.push(`.kiro/steering/${base}.md has drifted from .claude/commands/${commandFileName} — regenerate it`);
+      }
+    }
+  }
+
+  return { name: base, ok: failures.length === 0, failures };
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -291,10 +350,26 @@ function main() {
   }
 
   console.log('');
+  console.log('== Tooling aliases (.github/prompts, .kiro/steering vs .claude/commands) ==');
+  let aliasPass = 0;
+  for (const fileName of commandFiles) {
+    const result = validateAliasSync(fileName);
+    if (result.ok) {
+      aliasPass++;
+      console.log(`PASS  ${result.name}`);
+    } else {
+      anyFailure = true;
+      console.log(`FAIL  ${result.name}`);
+      for (const f of result.failures) console.log(`      - ${f}`);
+    }
+  }
+
+  console.log('');
   console.log('== Summary ==');
   console.log(`${skillPass}/${skillDirs.length} skills passed`);
   console.log(`${agentPass}/${agentFiles.length} agents passed`);
   console.log(`${commandPass}/${commandFiles.length} commands passed`);
+  console.log(`${aliasPass}/${commandFiles.length} tooling aliases in sync`);
 
   if (anyFailure) {
     console.log('');
