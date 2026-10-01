@@ -29,6 +29,7 @@ Primary automation stack: **Playwright + TypeScript/JavaScript**, running in **G
 | Build | `ui-test-automation-patterns` | Page Object / Screenplay patterns, resilient locators, no hardcoded waits (tool-agnostic) |
 | Build | `playwright-test-automation` | The concrete Playwright + TypeScript implementation path: fixtures, POM, sharding, trace viewer |
 | Build | `api-contract-test-automation` | Schema/contract validation, negative-case coverage for REST/GraphQL/gRPC |
+| Build | `api-test-automation-implementation` | Building the runnable suite: Playwright/Postman-Newman, auth flows, env config, request chaining |
 | Build | `mobile-test-automation` | Appium/Espresso/XCUITest, device fragmentation, flaky gesture timing |
 | Build | `bdd-gherkin-authoring` | When Gherkin earns its overhead, and how to keep it declarative |
 | Verify | `flaky-test-diagnosis-and-triage` | Root-cause flakiness instead of retrying it away |
@@ -55,13 +56,38 @@ Primary automation stack: **Playwright + TypeScript/JavaScript**, running in **G
 
 ## Slash Commands
 
-14 command entry points under `.claude/commands/` map onto the skills above: `/spec`, `/test-plan`, `/test-cases`, `/test-strategy`, `/playwright`, `/api-test`, `/review`, `/flaky-triage`, `/ci-debug`, `/regression`, `/bug-report`, `/qa-report`, `/exploratory`, `/accessibility`.
+14 command entry points under `.claude/commands/` map onto the skills above: `/spec`, `/test-plan`, `/test-cases`, `/test-strategy`, `/playwright`, `/api-test`, `/review`, `/flaky-triage`, `/ci-debug`, `/regression`, `/bug-report`, `/qa-report`, `/exploratory`, `/accessibility`. The same 14 are mirrored as Copilot prompt files (`.github/prompts/`) and Kiro manual steering files (`.kiro/steering/`) — see the tooling guides below.
+
+## Tooling
+
+This catalog's skills are usable from more than Claude Code:
+
+<details>
+<summary><b>Claude Code</b></summary>
+
+Native — `skills/` and `agents/` are discovered directly, `.claude/commands/` provides the 14 short aliases above.
+
+</details>
+
+<details>
+<summary><b>GitHub Copilot</b></summary>
+
+`.github/skills` symlinks to `skills/`, `.github/agents/*.agent.md` symlinks to `agents/*.md`, and `.github/prompts/` carries the short aliases. See [docs/copilot-setup.md](docs/copilot-setup.md).
+
+</details>
+
+<details>
+<summary><b>Kiro IDE & CLI</b></summary>
+
+`.kiro/skills` symlinks to `skills/`, and `.kiro/steering/` carries the short aliases as manual-inclusion steering files. See [docs/kiro-setup.md](docs/kiro-setup.md).
+
+</details>
 
 ## Validation & Evals
 
-- `node scripts/validate-skills.js` — structural CI gate: frontmatter contract, heading order, and command-to-skill references. Currently 25/25 skills, 4/4 agents, 14/14 commands passing.
+- `node scripts/validate-skills.js` — structural CI gate: frontmatter contract, heading order, and command-to-skill references. Currently 26/26 skills, 4/4 agents, 14/14 commands passing.
 - `evals/cases.md` — representative prompts (positive, ambiguous, out-of-scope, and "should ask a clarifying question") for a human or agent reviewer to walk through after changing any skill description. Not a live-model grader — see `evals/README.md`.
 
 ## Status
 
-This round was tailored against real answers in [ANSWERS.md](ANSWERS.md): Playwright/TypeScript as the primary stack, GitHub Actions + Jenkins for CI, and risk-based coverage / test data isolation / test health visibility / accessibility+security testing / AI-assisted QA flagged as current priorities. Core skills remain tool-agnostic by design; tool-specific guidance (Playwright, GitHub Actions, Jenkins) lives in dedicated skills or subsections rather than being forced into every file.
+This round was tailored against real answers in [ANSWERS.md](ANSWERS.md): Playwright/TypeScript as the primary stack, GitHub Actions + Jenkins for CI, and risk-based coverage / test data isolation / test health visibility / accessibility+security testing / AI-assisted QA flagged as current priorities. Core skills remain tool-agnostic by design; tool-specific guidance (Playwright, GitHub Actions, Jenkins) lives in dedicated skills or subsections rather than being forced into every file. See [CHANGELOG.md](CHANGELOG.md) for what's changed since, including multi-tool (Copilot/Kiro) support and the `api-test-automation-implementation` skill.

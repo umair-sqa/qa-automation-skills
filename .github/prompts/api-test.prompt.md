@@ -1,6 +1,6 @@
-# /api-test
-
-Design and automate API test scenarios for a REST/GraphQL/gRPC endpoint or contract.
+---
+description: Design and automate API test scenarios for a REST/GraphQL/gRPC endpoint or contract.
+---
 
 Apply the `api-contract-test-automation` skill for what to assert, and the `api-test-automation-implementation` skill for how to build the runnable test/collection.
 

@@ -10,8 +10,14 @@ This is the qa-automation-skills project — a collection of production-grade QA
 skills/             → Core skills (SKILL.md per directory)
 agents/             → Reusable persona agents (test-suite-reviewer, flaky-test-detective, performance-test-engineer, qa-automation-architect)
 references/         → Shared checklists (coverage, flakiness, CI gating, accessibility)
-docs/               → skill-anatomy.md — the format contract for every SKILL.md
-.claude/commands/   → Slash-command entry points onto the skills below
+docs/               → skill-anatomy.md (SKILL.md format contract), kiro-setup.md, copilot-setup.md
+.claude/commands/   → Slash-command entry points onto the skills below (Claude Code)
+.github/skills/     → Symlink to skills/ — Copilot skill discovery
+.github/agents/     → Symlinks to agents/*.md as *.agent.md — Copilot custom agents
+.github/prompts/    → Short /alias prompt files mirroring .claude/commands/ (Copilot)
+.github/copilot-instructions.md → Condensed fallback summary for Copilot surfaces that don't load skills
+.kiro/skills/       → Symlink to skills/ — Kiro skill discovery
+.kiro/steering/     → Short /alias manual-inclusion steering files mirroring .claude/commands/ (Kiro)
 scripts/            → validate-skills.js — structural CI gate for skills/agents/commands
 evals/              → cases.md — representative routing prompts for manual/agent review
 QUESTIONS.md        → Open questions used to tailor this catalog (see ANSWERS.md for the answers on file)
@@ -19,11 +25,13 @@ ANSWERS.md          → Recorded stack/process/priority answers this round was b
 CHANGELOG.md        → What changed, and when
 ```
 
+Symlinks are the source-of-truth mechanism for multi-tool support: edit `skills/` or `agents/` once, and Kiro/Copilot pick it up with no separate copy to keep in sync. Only `.claude/commands/`, `.github/prompts/`, `.kiro/steering/`, and `.github/copilot-instructions.md` are real (non-symlinked) files, since each tool's alias/instruction format differs slightly — see [docs/copilot-setup.md](docs/copilot-setup.md) for the regeneration command when editing an alias.
+
 ## Skills by Phase
 
 **Define:** requirements-and-acceptance-criteria-analysis, test-strategy-and-risk-based-planning, requirements-to-test-traceability
 **Plan:** test-case-design-techniques, test-data-management-strategy
-**Build:** test-automation-framework-selection, ui-test-automation-patterns, playwright-test-automation, api-contract-test-automation, mobile-test-automation, bdd-gherkin-authoring
+**Build:** test-automation-framework-selection, ui-test-automation-patterns, playwright-test-automation, api-contract-test-automation, api-test-automation-implementation, mobile-test-automation, bdd-gherkin-authoring
 **Verify:** flaky-test-diagnosis-and-triage, cross-browser-and-device-testing, performance-and-load-testing, accessibility-testing-automation, exploratory-testing-and-bug-reports
 **Review:** test-suite-quality-review, test-suite-simplification-and-dedup, regression-and-golden-scenario-management, security-testing-in-qa
 **Ship:** ci-cd-test-pipeline-integration, test-observability-and-reporting, release-readiness-and-exit-criteria, test-suite-migration-and-deprecation

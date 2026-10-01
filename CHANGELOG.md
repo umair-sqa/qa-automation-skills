@@ -2,6 +2,20 @@
 
 All notable changes to this catalog are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [2026-10-01]
+
+### Added — new skill
+
+- `api-test-automation-implementation` — the concrete implementation path for API test suites (Playwright `request` fixture, Postman/Newman collections, auth/token-flow handling, environment/secret management, request chaining, data-driven test design), complementing `api-contract-test-automation`'s schema/contract focus the same way `playwright-test-automation` complements `ui-test-automation-patterns`. Catalog is now 26 skills. `/api-test` (and its Copilot/Kiro aliases) now reference both API skills.
+
+### Added — Kiro and GitHub Copilot support
+
+- `.github/skills` and `.kiro/skills` — symlinks to the root `skills/` directory, so every skill is discovered natively by Copilot and Kiro with no content duplicated or copied.
+- `.github/agents/*.agent.md` — symlinks to `agents/*.md` (renamed to the `.agent.md` extension Copilot requires) so the four persona agents are usable as Copilot custom agents (`@qa-automation-architect`, etc.).
+- `.github/copilot-instructions.md` — condensed fallback summary for Copilot surfaces that don't load skills directly.
+- `.github/prompts/*.prompt.md` and `.kiro/steering/*.md` — the existing 14 `.claude/commands/` short aliases (`/spec`, `/api-test`, `/flaky-triage`, etc.), regenerated in each tool's native alias format so the same short entry points work in Copilot and Kiro.
+- `docs/copilot-setup.md` and `docs/kiro-setup.md` — setup and troubleshooting guides for each tool, including how to regenerate an alias after editing its `.claude/commands/` source.
+
 ## [2026-09-26]
 
 ### Added — initial catalog scaffold

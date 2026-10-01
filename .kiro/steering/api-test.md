@@ -1,3 +1,6 @@
+---
+inclusion: manual
+---
 # /api-test
 
 Design and automate API test scenarios for a REST/GraphQL/gRPC endpoint or contract.
