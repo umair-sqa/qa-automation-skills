@@ -71,7 +71,7 @@ shard_2: [c_test.py, d_test.py]      # both finish in 30s
 shard_1: [b_test.py]                  # ~8 min
 shard_2: [a_test.py, c_test.py, d_test.py]  # ~8 min combined
 ```
-Most CI platforms and test runners (pytest-split, Jest's `--shard`, Playwright's sharding) support duration-based splitting directly — use it instead of naive round-robin.
+Not every runner balances shards by duration out of the box — know which kind you have before trusting the split. **pytest-split** does this directly (reads a stored `.test_durations` file and chunks by recorded time). **Jest's** `--shard` and **Playwright's** `--shard` instead split by equal file count (or equal test count, with Playwright's `fullyParallel: true`) — balanced only if your files/tests happen to take similar time to run, not by actual duration. Getting duration-aware balancing out of either requires extra work: a custom `testSequencer` for Jest, or manually grouping files by recorded timing (as in the example above) for Playwright. Check which mode you're actually running before assuming the split above happens for free.
 
 ### Retry budget as a tripwire, not a fix
 

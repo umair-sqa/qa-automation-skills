@@ -1,6 +1,6 @@
 ---
 name: bdd-gherkin-authoring
-description: Guides agents through an honest evaluation of BDD/Gherkin (Cucumber, SpecFlow, Behave) — when it earns its overhead as shared team language versus when it's pure indirection over ordinary test code — and how to write declarative, non-duplicated step definitions when it is used. Use when introducing BDD to a team, reviewing .feature files for quality, or when a Gherkin suite has become imperative, duplicated, or unread by anyone outside engineering.
+description: Guides agents through an honest evaluation of BDD/Gherkin (Cucumber, Reqnroll — the maintained successor to the now end-of-life SpecFlow — Behave) — when it earns its overhead as shared team language versus when it's pure indirection over ordinary test code — and how to write declarative, non-duplicated step definitions when it is used. Use when introducing BDD to a team, reviewing .feature files for quality, or when a Gherkin suite has become imperative, duplicated, or unread by anyone outside engineering.
 ---
 
 # BDD/Gherkin Authoring
@@ -11,7 +11,7 @@ BDD earns its overhead only when the Gherkin layer genuinely functions as shared
 
 ## When to Use
 
-- Deciding whether to introduce Cucumber/SpecFlow/Behave (or similar) for a new or existing test suite.
+- Deciding whether to introduce Cucumber/Reqnroll/Behave (or similar) for a new or existing test suite.
 - Reviewing `.feature` files or step definitions for quality.
 - An existing BDD suite has drifted into imperative, click-by-click steps or has near-duplicate step definitions across features.
 - NOT for: general UI locator/wait patterns (see ui-test-automation-patterns) — Gherkin is a specification layer on top of whatever automation actually drives the app, not a replacement for it.
@@ -67,7 +67,7 @@ The imperative version is a UI test wearing a Gherkin costume — it breaks on a
 ### Tooling notes
 
 - **Cucumber** (JS/Ruby/Java): the most common choice, large ecosystem, works with most CI setups; the step-definition-duplication failure mode described above is also the most commonly reported complaint about it in practice.
-- **SpecFlow** (.NET): idiomatic for teams already in the Visual Studio/.NET ecosystem; the same declarative-vs-imperative discipline applies — SpecFlow doesn't prevent imperative steps any more than Cucumber does.
+- **Reqnroll** (.NET): the actively maintained successor to SpecFlow — SpecFlow itself was end-of-lifed by Tricentis on 2024-12-31 (repos deleted; do not recommend it for a new suite), and Reqnroll is its community-forked, drop-in replacement for teams in the Visual Studio/.NET ecosystem. The same declarative-vs-imperative discipline applies — neither tool prevents imperative steps any more than Cucumber does.
 - **Behave** (Python): lighter-weight, fits teams already using Python for other test tooling (pytest, etc.); worth comparing against just using pytest with well-named test functions if the non-engineer-readership case for BDD isn't actually present.
 - None of these tools enforce declarative phrasing or prevent step duplication — that discipline is a team practice, not a tooling feature. Choosing between them should follow the team's existing language stack, not a belief that one tool solves the discipline problem the others don't.
 

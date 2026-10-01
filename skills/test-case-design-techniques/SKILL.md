@@ -83,9 +83,9 @@ With 3 boolean flags there are 2^3 = 8 combinations. A decision table forces all
 | 5 | T | F | F | 0% |
 | 6 | T | F | T | 5% (promo only, membership needs $50 min) |
 | 7 | T | T | F | 10% (member discount) |
-| 8 | T | T | T | 15% (member + promo stack, capped) |
+| 8 | T | T | T | **Unconfirmed** — do member (10%) and promo (5%) stack to 15%, does one override the other, or is there an undocumented cap? |
 
-Building the full table surfaces the hidden rule ("membership discount requires the $50 minimum, but promo code doesn't") that a spot-check of 2-3 "obvious" cases would have missed entirely, and it exposes ambiguous combinations (row 8's stacking behavior) as an explicit question to confirm with the requirement owner rather than an assumption baked into one test.
+Building the full table surfaces the hidden rule ("membership discount requires the $50 minimum, but promo code doesn't") that a spot-check of 2-3 "obvious" cases would have missed entirely, and it exposes ambiguous combinations (row 8's stacking behavior) as an explicit question to confirm with the requirement owner — the table deliberately leaves this cell unresolved rather than baking in a confident-sounding number for behavior nobody has actually specified.
 
 ### State Transition Testing
 

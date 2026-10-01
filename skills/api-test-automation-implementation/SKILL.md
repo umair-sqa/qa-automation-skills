@@ -25,7 +25,7 @@ Knowing *what* to assert on an API response (schema, contract, negative cases �
 2. **Authenticate once per auth state, not once per test.** Acquire the token/session in a fixture (Playwright), a pre-request script / Newman `--folder` setup step (Postman), a `beforeAll`/root hook (Jest/Mocha), or Pactum's `spec().withBearerToken(...)` wired into a shared helper, that runs once per auth state (e.g., "as admin," "as regular user," "unauthenticated") and reuse it. A test that logs in inline duplicates setup and hides which auth state the test actually needs.
 3. **Externalize every environment-specific value.** Base URL, credentials, tenant IDs, and feature-flag values live in environment config (Playwright `.env` + `playwright.config.ts` `use.baseURL`/`extraHTTPHeaders`; a Postman environment file; or `process.env` read once in a Jest/Mocha setup file or Pactum's `request.setBaseUrl(...)`) — never as a literal string inside a test body. A test that hardcodes `https://staging.example.com` cannot run against any other environment without editing test code.
 4. **Never commit real secrets into test code or committed Postman environments.** Pull tokens/API keys from environment variables or a secrets manager at run time; committed Postman environment JSON files must only contain placeholder values with the real ones injected via Newman `-e`/`--env-var` at CI run time, and the same rule applies to any `.env` file a Jest/Mocha/Pactum suite reads.
-5. **Chain requests through explicit extracted state, not shared mutable fixtures.** When step 2 needs an ID created in step 1, extract it explicitly (Playwright: `const { id } = await res.json()`; Postman: `pm.environment.set('orderId', jsonData.id)` in a test script; Pactum: `.returns('id')` into `$S{id}` in the next `spec()`; Supertest: read `res.body.id` from the prior `await request(app)...` call) and pass it forward. Don't rely on tests running in file order or on a shared outer-scope variable mutated across unrelated test cases.
+5. **Chain requests through explicit extracted state, not shared mutable fixtures.** When step 2 needs an ID created in step 1, extract it explicitly (Playwright: `const { id } = await res.json()`; Postman: `pm.environment.set('orderId', jsonData.id)` in a test script; Pactum: `.stores('OrderId', 'id')` into `$S{OrderId}` in the next `spec()`; Supertest: read `res.body.id` from the prior `await request(app)...` call) and pass it forward. Don't rely on tests running in file order or on a shared outer-scope variable mutated across unrelated test cases.
 6. **Design data-driven cases around input shape, not copy-pasted test bodies.** Loop over a data table of inputs (valid/invalid/boundary payloads) against one parameterized request-building function, matching the equivalence/boundary technique from `test-case-design-techniques` rather than hand-writing near-identical test bodies per case.
 7. **Isolate state per test run.** Each chained workflow test should create its own resources (don't assume a specific seeded record exists) and clean up after itself (or run against a scope — tenant, namespace — that's torn down as a unit), so re-running the suite concurrently or repeatedly doesn't collide.
 8. **Wire the suite into CI the same way contract tests are gated.** Newman collections run via `newman run collection.json -e env.json` as a CI step with a non-zero exit on failure; Playwright API tests run in the same pipeline as UI tests. A collection that only runs from someone's local Postman app isn't part of the test suite — it's documentation.
@@ -88,31 +88,39 @@ newman run orders.postman_collection.json -e env.staging.json --env-var "apiKey=
 ```js
 const { spec } = require('pactum');
 
+before(async () => {
+  await spec()
+    .post('/auth/token')
+    .withJson({ grant_type: 'client_credentials', client_id: process.env.ADMIN_CLIENT_ID, client_secret: process.env.ADMIN_CLIENT_SECRET })
+    .expectStatus(200)
+    .stores('AdminToken', 'access_token'); // saves response.body.access_token as $S{AdminToken}
+});
+
 test('order lifecycle: create, fetch, cancel', async () => {
-  const { id: orderId } = await spec()
+  await spec()
     .post('/orders')
-    .withBearerToken('$S{adminToken}')
+    .withBearerToken('$S{AdminToken}')
     .withJson(newOrderPayload())
     .expectStatus(201)
     .expectJsonSchema(orderResponseSchema) // Pactum's built-in schema assertion — no separate library
-    .returns('id'); // stores into the $S{} data store for the next spec()
+    .stores('OrderId', 'id'); // saves response.body.id as $S{OrderId}
 
   await spec()
     .get('/orders/{id}')
-    .withPathParams('id', orderId)
-    .withBearerToken('$S{adminToken}')
+    .withPathParams('id', '$S{OrderId}')
+    .withBearerToken('$S{AdminToken}')
     .expectStatus(200)
     .expectJsonLike({ status: 'pending' });
 
   await spec()
     .post('/orders/{id}/cancel')
-    .withPathParams('id', orderId)
-    .withBearerToken('$S{adminToken}')
+    .withPathParams('id', '$S{OrderId}')
+    .withBearerToken('$S{AdminToken}')
     .expectStatus(200);
 });
 ```
 
-Pactum's `.returns()`/`$S{}` data store is the explicit-state-passing mechanism for this tool — it's still explicit extraction (step 5), not a hidden shared variable, because the value only flows forward through the chain that set it. Pactum also ships a built-in mock server (`pactum.mock`) for stubbing a downstream dependency inline in a spec, without a separate mocking library.
+Pactum's `.stores(name, jsonPath)` / `$S{name}` data store is the explicit-state-passing mechanism for this tool — it's still explicit extraction (step 5), not a hidden shared variable, because a value only flows forward through specs that reference its name, and nothing is left on an ambient outer-scope variable. For mocking a downstream dependency, `spec().useInteraction(...)` scopes a mock to one spec's lifetime (cleaned up automatically afterward); `pactum.mock.addInteraction(...)` registers one that persists across the whole suite run instead — prefer the per-spec form unless several tests genuinely need the same stub.
 
 ### Jest or Mocha + Supertest + Chai
 
@@ -134,36 +142,39 @@ describe('orders API', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send(newOrderPayload());
     expect(res.status).toBe(201);
-    expect(res.body).toMatchSchema(orderResponseSchema); // e.g. via jest-json-schema
+    expect(res.body).toMatchSchema(orderResponseSchema); // jest-json-schema
   });
 });
 ```
 
+`toMatchSchema` isn't a built-in Jest matcher — it comes from `jest-json-schema`, registered once via `expect.extend(matchers)` in a Jest `setupFilesAfterEnv` file, not re-imported per test file.
+
 ```js
-// Mocha + Chai (chai-http or supertest, same pattern)
-const chai = require('chai');
-const chaiHttp = require('chai-http');
-chai.use(chaiHttp);
-const { expect } = chai;
+// Mocha + Chai (assertions) + Supertest (requests) — Supertest is runner-agnostic,
+// so this is the same HTTP client as the Jest example above, just a different
+// runner and assertion style.
+const request = require('supertest');
+const { expect } = require('chai');
+const app = require('../app');
 
 describe('orders API', function () {
   let adminToken;
   before(async function () {
-    const res = await chai.request(app).post('/auth/token').send(adminCredentials());
+    const res = await request(app).post('/auth/token').send(adminCredentials());
     adminToken = res.body.access_token;
   });
 
   it('creates an order', async function () {
-    const res = await chai.request(app)
+    const res = await request(app)
       .post('/orders')
       .set('Authorization', `Bearer ${adminToken}`)
       .send(newOrderPayload());
-    expect(res).to.have.status(201);
+    expect(res.status).to.equal(201);
   });
 });
 ```
 
-The `beforeAll`/`before` hook is this stack's equivalent of a Playwright auth fixture or a Postman pre-request script — acquire the token once per `describe` block (per auth state), not inside each `test`/`it`.
+The `beforeAll`/`before` hook is this stack's equivalent of a Playwright auth fixture or a Postman pre-request script — acquire the token once per `describe` block (per auth state), not inside each `test`/`it`. Chai's own HTTP plugin (`chai-http`) is deliberately left out here: its current major version replaced the familiar `chai.request(app)` chain with `request.execute(app)`, and pairing plain Supertest (used identically from both Jest and Mocha) with Chai purely for its `expect` assertion style avoids both that churn and running two HTTP-request libraries for one suite.
 
 ### Data-driven request table
 

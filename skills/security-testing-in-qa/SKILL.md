@@ -27,7 +27,7 @@ Security bugs are functional bugs — a user accessing another user's data is a 
 
 3. **Wire a SAST tool into the pipeline as a gate, not a report nobody reads.** Run static analysis (e.g. Semgrep, CodeQL, Bandit) on every PR, fail the build on new high/critical findings, and require explicit triage (fix or documented accepted-risk) for anything else. A SAST report that's generated but not blocking is equivalent to not running it.
 
-4. **Wire a DAST tool into the pipeline against a running test environment.** Run a dynamic scanner (e.g. OWASP ZAP, Burp Suite's automation) against staging or a test deploy on a schedule or per-release, targeting the same endpoints covered by functional test suites, and gate release on no new high-severity findings.
+4. **Wire a DAST tool into the pipeline against a running test environment.** Run a dynamic scanner (e.g. ZAP — formerly "OWASP ZAP" before the project left the OWASP Foundation in 2023, same tool and CLI — or Burp Suite's automation) against staging or a test deploy on a schedule or per-release, targeting the same endpoints covered by functional test suites, and gate release on no new high-severity findings.
 
 5. **Gate on dependency vulnerability scanning as part of the standard test gate.** Run a dependency/SCA scanner (e.g. `npm audit`, Dependabot, Snyk, `pip-audit`, `trivy`) on every build, not as an ad hoc quarterly exercise. Treat a new critical CVE in a direct dependency the same way you'd treat a failing test: it blocks merge or release until triaged.
 

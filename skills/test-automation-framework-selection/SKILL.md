@@ -31,15 +31,15 @@ Score each candidate 1-5 per criterion against your own weights — the table be
 
 | Criterion | Playwright | Cypress | Selenium/WebdriverIO |
 |---|---|---|---|
-| Cross-browser coverage (real WebKit/Firefox, not just Chromium) | Native multi-browser | Chromium-first, WebKit/Firefox experimental | Broadest, via WebDriver protocol |
-| Parallelization | Built-in sharding | Requires paid/3rd-party orchestration for scale | Depends on grid setup |
+| Cross-browser coverage (real WebKit/Firefox, not just Chromium) | Native multi-browser | Chromium-first, Firefox stable since v4.4, WebKit experimental (`experimentalWebKitSupport`) | Broadest, via WebDriver protocol |
+| Parallelization | Built-in sharding | Requires paid/3rd-party orchestration for scale | WebdriverIO parallelizes locally via `maxInstances`; raw Selenium scripts depend on grid setup |
 | Flakiness profile of the tool itself | Auto-waiting, low false failures | Auto-waiting, occasional iframe/cross-origin friction | Manual waits common; most flake reports trace here |
 | Language/stack fit | JS/TS/Python/.NET/Java | JS/TS only | Nearly any language via bindings |
-| CI integration maturity | Mature, first-class trace artifacts | Mature, dashboard product available | Mature but more assembly required |
+| CI integration maturity | Mature, first-class trace artifacts | Mature, Cypress Cloud for recording/orchestration | Mature but more assembly required |
 | Debugging/trace tooling | Trace viewer, video, step timeline | Time-travel debugger in runner | Varies by grid/vendor |
 | Community/maintenance cost | Actively growing | Large, stable | Largest, slowing on new features |
 
-For API: REST Assured (Java-idiomatic, fits JVM stacks), Supertest (Node, fits JS backends, fast/no network hop needed for in-process apps, pairs with Jest or Mocha+Chai as the runner/assertion layer), PactumJS (Node, built-in JSON schema/contract assertions and a mock server in the same library — worth weighing against Supertest + a separate schema-validation library when the team wants both in one tool), Postman/Newman (good for exploratory + handoff to non-engineers, weaker as a first-class code-reviewed test suite). Score the same way: language fit, CI maturity, and whether the tool encourages schema assertions or just status-code checks (see api-contract-test-automation and api-test-automation-implementation for Jest/Mocha/PactumJS implementation patterns once chosen).
+For API: REST Assured (Java-idiomatic, fits JVM stacks), Supertest (Node, fits JS backends, fast/no network hop needed for in-process apps, pairs with Jest or Mocha+Chai as the runner/assertion layer), PactumJS (Node, built-in JSON schema/contract assertions and a mock server in the same library — worth weighing against Supertest + a separate schema-validation library when the team wants both in one tool), Postman/Newman (good for exploratory + handoff to non-engineers, weaker as a first-class code-reviewed test suite). Score the same way: language fit, CI maturity, and whether the tool encourages schema assertions or just status-code checks (see `api-contract-test-automation` for that assertion-design question; see `api-test-automation-implementation` for the Jest/Mocha/PactumJS/Supertest implementation patterns once a tool is chosen).
 
 For mobile: Appium (cross-platform, WebDriver-based, higher setup cost), Espresso (Android-native, fast, in-process, no cross-platform reuse), XCUITest (iOS-native, same tradeoff), Detox (React Native, gray-box, fast and less flaky for RN apps specifically). The right axis here is almost always "what is the app written in," not general popularity — see mobile-test-automation for the fragmentation and device-farm tradeoffs once a tool is chosen.
 

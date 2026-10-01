@@ -67,7 +67,7 @@ Prioritize by risk, same lens as `test-strategy-and-risk-based-planning`: migrat
 Migrated slice: checkout flow
 New suite first green run: 2026-09-10
 Retirement window: 14 days OR 20 merges to main, whichever is longer
-Old suite for this slice removed: 2026-09-24 (after 16 clean days, 27 merges)
+Old suite for this slice removed: 2026-09-24 (after 14 clean days, 27 merges)
 ```
 Codifying the window as a number (days or merge count) prevents "it looked fine so I deleted it the next day" as well as "we never got around to deleting it" from both being the default outcome.
 

@@ -51,8 +51,8 @@ Never let "it passed on my emulator" substitute for at least one real-device pas
 ### Gesture and animation timing
 
 ```js
-// BAD: fixed wait tuned to one device's animation speed
-await driver.pause(2000);
+// BAD (Detox): fixed wait tuned to one device's animation speed
+await new Promise((resolve) => setTimeout(resolve, 2000));
 await element(by.id('card')).swipe('left');
 
 // GOOD: wait on the actual condition, then act

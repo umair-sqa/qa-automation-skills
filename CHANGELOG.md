@@ -4,6 +4,19 @@ All notable changes to this catalog are documented here. Format loosely follows 
 
 ## [2026-10-01]
 
+### Fixed — full-catalog technical accuracy audit
+
+Every one of the 26 `skills/*/SKILL.md` files was read in full and fact-checked against current tool docs (not memory) — self-review plus 4 parallel deep-audit passes covering web/mobile/perf, CI/security/a11y/BDD, requirements/strategy, and review/release/observability skill groups. 8 real, verified defects found and fixed (structural checks — frontmatter, headings, cross-references, code-fence balance — were already clean beforehand and remain 26/26 passing):
+
+- `api-test-automation-implementation` — the PactumJS example used a fabricated `.returns('id')` method; Pactum's real chaining API is `.stores(name, jsonPath)` / `$S{name}`. Also replaced the Mocha+Chai example's `chai-http` usage (`chai.request(app)`), which is deprecated in chai-http's current major version (now `request.execute(app)`), with the more stable Supertest+Chai pairing already used for requests elsewhere in the same skill.
+- `test-automation-framework-selection` — Cypress's Firefox support has been stable since v4.4 (2020); only WebKit is still experimental — the comparison table wrongly lumped both in as "experimental." Also fixed a misattribution where `api-contract-test-automation` (schema/contract) was cited alongside `api-test-automation-implementation` for Jest/Mocha/PactumJS *implementation* patterns that only the latter skill covers; refined the WebdriverIO parallelization claim (it parallelizes locally via `maxInstances`, not only via a Selenium grid); renamed "Cypress dashboard" to Cypress Cloud (rebranded 2023).
+- `bdd-gherkin-authoring` — recommended SpecFlow, which Tricentis end-of-lifed on 2024-12-31 (repos deleted); replaced with Reqnroll, its actively maintained community-forked successor, across the frontmatter description, a `When to Use` bullet, and the tooling notes.
+- `ci-cd-test-pipeline-integration` — corrected an overstated claim that Jest's and Playwright's `--shard` do duration-based splitting "directly" like pytest-split does; both actually split by equal file/test count by default (verified against current Playwright docs — a suspected `--shard-weights` flag turned out not to exist and was deliberately left out).
+- `mobile-test-automation` — a "bad" gesture-timing code example mixed WebdriverIO's `driver.pause()` with Detox's `element()`/`waitFor()` API in one snippet, which wouldn't run against either tool as written; made it pure Detox throughout.
+- `test-case-design-techniques` — a decision-table worked example asserted a confident "15%, capped" outcome for the one row its own surrounding prose said should be left as an open question for the requirement owner, not assumed; the table now leaves that cell explicitly unconfirmed instead of contradicting its own caption.
+- `test-suite-migration-and-deprecation` — a worked example's dates (2026-09-10 to 2026-09-24) are 14 days apart but the text claimed "16 clean days."
+- `security-testing-in-qa` — minor: noted ZAP's 2023 departure from the OWASP Foundation (tool/CLI unchanged, "OWASP ZAP" branding is dated).
+
 ### Added — new skill
 
 - `api-test-automation-implementation` — the concrete implementation path for API test suites (Playwright `request` fixture, Postman/Newman collections, auth/token-flow handling, environment/secret management, request chaining, data-driven test design), complementing `api-contract-test-automation`'s schema/contract focus the same way `playwright-test-automation` complements `ui-test-automation-patterns`. Catalog is now 26 skills. `/api-test` (and its Copilot/Kiro aliases) now reference both API skills.
